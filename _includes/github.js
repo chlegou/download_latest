@@ -13,13 +13,13 @@ GithubRepository.prototype.getAssetName = function () {
 
 GithubRepository.prototype.redirectToReleaseFile = function (release) {
   console.log(release);
-  var index = this.getQueryParam("index");
-  if(!index){
-    console.log("Looking for asset: " + assetName);
+  var assetName = this.getAssetName();
+
+  var downloaded = false;
+  var names = [];
+  if(assetName.length > 0){
+    console.log("Looking for asset: " + assetName)
     
-    var assetName = this.getAssetName();
-    var downloaded = false;
-    var names = [];
     for (var i = 0; i < release.assets.length; i += 1) {
       var asset = release.assets[i];
       names.push(asset.name);
@@ -31,16 +31,20 @@ GithubRepository.prototype.redirectToReleaseFile = function (release) {
     if (!downloaded) {
       couldNotDownloadAsset("File " + assetName + " not found. Should be one of " + names.join(", ") + ".");
     }
-  } else {
+  }else{
+    var index = this.getQueryParam("index");
     // making 0 as default index
     index = index ? index : 0;
     if(release.assets.length > index){
       downloadAsset(release.assets[index].browser_download_url);
-    } else {
-      couldNotDownloadAsset("No file found with index " + index + "." +
-        " Number of files: " + release.assets.length);
+      downloaded = true;
     }
+    if (!downloaded) {
+      couldNotDownloadAsset("No File Found with index " + assetName + ".");
+    }
+
   }
+  
 }
 
 GithubRepository.prototype.startDownload = function () {
